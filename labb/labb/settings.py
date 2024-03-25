@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import psycopg2
+from datetime import datetime
+import json, string, random
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -121,3 +124,53 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+def sendResponse(request, resultCode, data, action="no action"):
+    response = {}
+    response["resultCode"] = resultCode
+    response["resultMessage"] = resultMessages[resultCode]
+    response["data"] = data
+    response["size"] = len(data)
+    response["action"] = action
+    response["curdate"] = datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+
+
+    return json.dumps(response, indent=4, sort_keys=True, default=str)
+#   sendResponse
+
+#Messages
+resultMessages = {
+    200:"Success",
+    404:"Not found",
+    1000 : "Burtgeh bolomjgui. Mail hayag umnu burtgeltei baina",
+    1001 : "Hereglegch Amjilttai burtgegdlee. Batalgaajuulah mail ilgeegdlee. 24 tsagiin dotor batalgaajuulna.",
+    1002 : "Batalgaajuulah mail ilgeelee",
+    3001 : "ACTION BURUU",
+    3002 : "METHOD BURUU",
+    3003 : "JSON BURUU",
+}
+
+# db connection
+def connectDB():
+    con = psycopg2.connect (
+        host = '192.168.0.15',
+        # host = '59.153.86.251',
+        dbname = 'qrlesson',
+        user = 'userlesson',
+        password = '123',
+        port = '5938',
+    )
+    return con
+# connectDB
+
+# DB disconnect hiij baina
+def disconnectDB(con):
+    con.close()
+# disconnectDB
+
+#random string generating
+def generateStr(length):
+    characters = string.ascii_lowercase + string.digits
+    password = ''.join(random.choice(characters) for i in range(length))
+    return password
+# generateStr
