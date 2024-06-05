@@ -9,12 +9,35 @@ from django.views.decorators.csrf import csrf_exempt
 def gettime(request):
     jsons = json.loads(request.body)
     action = jsons['action']
-
     today = datetime.now()
     data = [{'datetime':today}]
-    resp = sendResponse(request, 200, data, action)
-    return resp
-# gettime
+    result = sendResponse(request, 200, data, action)
+    return result
+
+@csrf_exempt
+def checkService(request):
+    if request.method == "POST":
+        try :
+            jsons = json.loads(request.body)
+        except json.JSONDecodeError:
+            action = "wrong json"
+            data = []
+            result = sendResponse(request, 404, data, "action")
+            return JsonResponse(json.loads(result))
+        if 'action' in jsons:
+            action = jsons['action']
+            if action == 'gettime':
+                result = gettime(request)
+                return JsonResponse(json.loads(result))
+        else:
+            data = {'action':"not found"}
+            return JsonResponse(data)
+    else:
+        action = "method buruu"
+        data = []
+        result = sendResponse(404, data, action)
+        return JsonResponse(json.loads(result))
+
 
 def dt_register(request):
     jsons = json.loads(request.body)
@@ -32,13 +55,13 @@ def dt_register(request):
     
     cursor.execute(query)
     columns = cursor.description
-    respRow = [{columns[index][0]:column for index, 
+    resultRow = [{columns[index][0]:column for index, 
         column in enumerate(value)} for value in cursor.fetchall()]
     cursor.close()
 
-    if respRow[0]['usercount'] == 1:
+    if resultRow[0]['usercount'] == 1:
         data = [{'email':email}]
-        resp = sendResponse(request, 1000, data, action)
+        result = sendResponse(request, 1000, data, action)
     else:
         token = generateStr(12)
         query = F"""INSERT INTO public.t_user(
@@ -50,32 +73,10 @@ def dt_register(request):
         myCon.commit()
         cursor1.close()
         data = [{'email':email, 'firstname':firstname, 'lastname': lastname}]
-        resp = sendResponse(request, 1001, data, action)
+        result = sendResponse(request, 1001, data, action)
 
-    return resp
+    return result
 # dt_register
 
-@csrf_exempt
-def checkService(request):
-    if request.method == "POST":
-        try :
-            jsons = json.loads(request.body)
-        except json.JSONDecodeError:
-            result = sendResponse(request, 3003, [], "no action")
-            return JsonResponse(json.loads(result))
-        action = jsons['action']
 
-        if action == 'gettime':
-            result = gettime(request)
-            return JsonResponse(json.loads(result))
-        elif action == 'register':
-            result = dt_register(request)
-            return JsonResponse(json.loads(result))
-        else:
-            result = sendResponse(request, 3001, [], action)
-            return JsonResponse(json.loads(result))
-    else:
-        result = sendResponse(request, 3002, [], "no action")
-        return JsonResponse(json.loads(result))
-#checkService
 
