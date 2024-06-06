@@ -11,8 +11,70 @@ def gettime(request):
     action = jsons['action']
     today = datetime.now()
     data = [{'datetime':today}]
-    result = sendResponse(request, 200, data, action)
+    result = sendResponse(request, 200, data, action)   
     return result
+
+def getasuult(request):
+    jsons = json.loads(request.body)
+    action = jsons['action']
+    try:
+        onn = jsons['onn']
+        hicheelkod = jsons['hicheelkod']
+        huvilbar = jsons['huvilbar']
+        asuulttoo = jsons["asuulttoo"]
+    except Exception as e:
+        action = action
+        data = [{"error": str(e) + " key error"}]
+        result = sendResponse(404, data, action)
+        return result
+
+    try: 
+        myCon = connectDB()
+        cursor = myCon.cursor()
+        
+        query = F"""SELECT t_asuult.aid, t_asuult.asuult, t_asuult.hicheelkod, t_asuult.onn, t_asuult.catkod, 
+                            t_asuult.onoo, t_asuult.huvilbar, t_asuult.huvilbarid, t_asuult.minutes
+                            FROM mttest.t_asuult
+                            WHERE o = {onn} AND hicheelkod = {hicheelkod} AND huvilbar = '{huvilbar}'
+                            ORDER BY random()
+                            LIMIT {asuulttoo}"""
+        cursor.execute(query)
+        columns = cursor.description
+        respRow = [{columns[index][0]:column for index, 
+            column in enumerate(value)} for value in cursor.fetchall()]
+        cursor.close()
+
+        # print(respRow)
+        for row in respRow:
+            print(row['aid'])
+            cursor = myCon.cursor()
+        
+            query = F"""SELECT hid,aid,hariult, correctans, hariultid 
+                        FROM mttest.t_hariult 
+                        WHERE aid = {row['aid']} 
+                        ORDER BY hariultid"""
+            cursor.execute(query)
+            columns = cursor.description
+            respRowHariult = [{columns[index][0]:column for index, 
+                column in enumerate(value)} for value in cursor.fetchall()]
+            print(respRowHariult)
+            row["hariult"] = respRowHariult
+
+            print(respRow)
+            cursor.close()
+
+        disconnectDB(myCon)
+        
+        data = respRow
+        result = sendResponse(200, data, action)
+        return result
+    except Exception as e:
+        action = action
+        data = [{"error": str(e) + " database error"}]
+        result = sendResponse(404, data, action)
+        return result
+#getasuult
+
 
 @csrf_exempt
 def checkService(request):
