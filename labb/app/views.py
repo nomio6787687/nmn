@@ -15,6 +15,7 @@ def gettime(request):
     return result
 
 def getasuult(request):
+    
     jsons = json.loads(request.body)
     action = jsons['action']
     try:
@@ -35,7 +36,7 @@ def getasuult(request):
         query = F"""SELECT t_asuult.aid, t_asuult.asuult, t_asuult.hicheelkod, t_asuult.onn, t_asuult.catkod, 
                             t_asuult.onoo, t_asuult.huvilbar, t_asuult.huvilbarid, t_asuult.minutes
                             FROM mttest.t_asuult
-                            WHERE o = {onn} AND hicheelkod = {hicheelkod} AND huvilbar = '{huvilbar}'
+                            WHERE onn = {onn} AND hicheelkod = {hicheelkod} AND huvilbar = '{huvilbar}'
                             ORDER BY random()
                             LIMIT {asuulttoo}"""
         cursor.execute(query)
@@ -46,7 +47,7 @@ def getasuult(request):
 
         # print(respRow)
         for row in respRow:
-            print(row['aid'])
+            print('********************************2    ')
             cursor = myCon.cursor()
         
             query = F"""SELECT hid,aid,hariult, correctans, hariultid 
@@ -57,10 +58,9 @@ def getasuult(request):
             columns = cursor.description
             respRowHariult = [{columns[index][0]:column for index, 
                 column in enumerate(value)} for value in cursor.fetchall()]
-            print(respRowHariult)
+            
             row["hariult"] = respRowHariult
 
-            print(respRow)
             cursor.close()
 
         disconnectDB(myCon)
@@ -89,7 +89,12 @@ def checkService(request):
         if 'action' in jsons:
             action = jsons['action']
             if action == 'gettime':
+                
                 result = gettime(request)
+                return JsonResponse(json.loads(result))
+            elif action == 'getasuult':
+                
+                result = getasuult(request)
                 return JsonResponse(json.loads(result))
         else:
             data = {'action':"not found"}

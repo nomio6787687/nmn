@@ -113,7 +113,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-def sendResponse(request, resultCode, data, action="no action"):
+def sendResponse(  resultCode, data, action="no action"):
     response = {}
     response["resultCode"] = resultCode
     response["resultMessage"] = resultMessages[resultCode]
