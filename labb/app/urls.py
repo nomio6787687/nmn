@@ -3,5 +3,5 @@ from django.urls import path
 from .views import checkService
 
 urlpatterns = [
-    path('gettime/', checkService, name='checkService'),
+    path('gettime/', checkService),
 ]

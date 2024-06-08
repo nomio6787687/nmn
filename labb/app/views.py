@@ -11,7 +11,7 @@ def gettime(request):
     action = jsons['action']
     today = datetime.now()
     data = [{'datetime':today}]
-    result = sendResponse(request, 200, data, action)   
+    result = sendResponse(200, data, action)   
     return result
 
 def getasuult(request):
@@ -47,7 +47,6 @@ def getasuult(request):
 
         # print(respRow)
         for row in respRow:
-            print('********************************2    ')
             cursor = myCon.cursor()
         
             query = F"""SELECT hid,aid,hariult, correctans, hariultid 
